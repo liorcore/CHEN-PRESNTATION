@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>חפיפת פרויקטים לטובת חופשת האינג'יניר</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <!-- Tailwind CDN + Swiper CSS -->
+  <!-- Tailwind (CDN) for quick styling utilities + Swiper CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     :root{
       --glass-bg: rgba(255,255,255,0.06);
       --glass-border: rgba(255,255,255,0.08);
-      --panel-width: 240px;
+      --panel-width: 240px; /* רוחב הפאנל הצידי */
     }
     html,body{height:100%; margin:0; font-family:'Rubik',sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
     body{
@@ -21,7 +21,7 @@
       overflow: hidden;
     }
 
-    /* SIDEBAR (RIGHT) */
+    /* SIDEBAR (RIGHT for RTL) */
     #sidePanel{
       position: fixed;
       top: 50%;
@@ -62,7 +62,8 @@
     .swiper { margin-right: var(--panel-width); width: calc(100vw - var(--panel-width)); height:100vh; }
 
     @media (max-width: 900px) {
-      #sidePanel { display:none; } /* מסתיר במובייל */
+      /* סמארטפון - מסתיר את הפאנל ומרכיב את השקופיות לרוחב מלא */
+      #sidePanel { display:none; }
       .swiper { margin-right: 0; width: 100vw; }
     }
 
@@ -76,7 +77,6 @@
       padding: 2rem;
       box-sizing: border-box;
       overflow: auto;
-      flex-direction: column; /* חובה למובייל */
     }
 
     .card {
@@ -114,9 +114,11 @@
     .logo { position: fixed; top: 1rem; right: calc(var(--panel-width) + 1rem); height:56px; z-index:130; opacity:0.98; }
     @media(max-width:900px){ .logo { right: 1rem; } }
 
+    /* titles bigger for readability */
     h1.title-main { font-size: clamp(30px, 6vw, 56px); margin:0; font-weight:900; }
     h2.project-title { font-size: clamp(22px, 3.6vw, 38px); margin:0; font-weight:800; }
 
+    /* navigation bottom */
     .nav-btn {
       position: fixed;
       left: 50%;
@@ -150,12 +152,15 @@
     }
     @media(max-width:900px){ .progress { right:1.6rem; } }
 
+    /* reveal animation */
     .reveal { opacity:0; transform: translateY(10px); transition: all .6s cubic-bezier(.2,.9,.25,1); }
     .reveal.visible { opacity:1; transform: translateY(0); }
 
-    /* footer under content */
-    .footer-note { margin-top:1rem; text-align:center; color:#9fb0c7; font-size:0.95rem; font-style:italic; user-select:none; }
+    /* footer note (ensure present on every slide) */
+    .footer-note { position: absolute; bottom: 1.2rem; left: 2rem; right: calc(var(--panel-width) + 2rem); text-align:center; color:#9fb0c7; font-size:0.95rem; font-style:italic; user-select:none; }
+    @media(max-width:900px){ .footer-note{ right:2rem; } }
 
+    /* warning final slide big, blinking + bounce */
     .final-warning {
       background: linear-gradient(90deg,#fef3c7,#facc15);
       color:#7a2b00;
@@ -175,57 +180,273 @@
       font-size: clamp(16px, 2.8vw, 22px);
       animation: warn-blink 1.2s steps(2, end) infinite;
     }
-    @keyframes warn-blink { 0%{opacity:1;}50%{opacity:0.15;}100%{opacity:1;} }
-    @keyframes warn-bounce { 0%{transform:translateY(0);}50%{transform:translateY(-10px);}100%{transform:translateY(0);} }
+    @keyframes warn-blink {
+      0%{ opacity:1; } 50%{ opacity:0.15; } 100%{ opacity:1; }
+    }
+    @keyframes warn-bounce {
+      0%{ transform: translateY(0); } 50%{ transform: translateY(-10px); } 100%{ transform: translateY(0); }
+    }
 
+    /* small screens adjust */
     @media(max-width:720px){
       .card{ padding:1rem; flex-direction:column; align-items:center; text-align:center; }
       .left-col, .right-col{ width:100%; min-width:unset; }
       .img-grid img, .single-img img{ height:200px; }
+      .footer-note{ display:block; position: static; margin-top:1rem; }
     }
   </style>
 </head>
 <body>
 
+  <!-- logo (moved left of panel) -->
   <img src="PLE-LOGO.png" alt="PLE" class="logo" />
 
-  <!-- SIDE PANEL (מוסתר במובייל) -->
+  <!-- SIDE PANEL (RIGHT) -->
   <nav id="sidePanel" aria-label="ניווט שקופיות">
     <h3>תפריט שקופיות</h3>
+    <!-- כפתורים יתמלאו דינמית ב-JS -->
   </nav>
 
+  <!-- bottom nav -->
   <div class="nav-btn" role="navigation" aria-label="ניווט שקופיות">
-    <button id="prevBtn" aria-label="שקופית קודמת">הקודם ⟶</button>
+  	<button id="prevBtn" aria-label="שקופית קודמת">הקודם ⟶</button>
     <button id="nextBtn" aria-label="שקופית הבאה">⟵ הבא </button>
   </div>
 
   <div class="progress" id="progress">1 / 8</div>
 
+  <!-- Swiper container (moved left to avoid panel) -->
   <div class="swiper mySwiper" id="app">
     <div class="swiper-wrapper">
 
-      <!-- דוגמה לשקופית -->
+      <!-- HERO -->
       <section class="swiper-slide slide" data-index="1" aria-label="שקופית 1">
         <div class="card reveal">
           <div class="left-col">
             <h1 class="title-main">חפיפת פרויקטים</h1>
             <p class="text-cyan-300 mt-3 font-semibold">לטובת חופשת האינג'יניר</p>
-            <p class="mt-4 text-slate-200 leading-relaxed">מצגת זו מציגה סקירה מקיפה של הפרויקטים הלאומיים והתשתיתיים שבניהולנו — פרטי פרויקט, תקציבים, לוחות זמנים, תמונות ומידע צוותי.</p>
+            <p class="mt-4 text-slate-200 leading-relaxed">מצגת זו מציגה סקירה מקיפה של הפרויקטים הלאומיים והתשתיתיים שבניהולנו — פרטי פרויקט, תקציבים, לוחות זמנים, תמונות ומידע צוותי. המטרה: לאפשר המשכיות מלאה בזמן חופשה/העברה.</p>
+
+            <ul class="mt-6 space-y-2 text-sm text-slate-300">
+              <li>פורמט אחיד לשקופיות</li>
+              <li>תמונות רספונסיביות ומסודרות</li>
+              <li>אנימציות קלות כדי לשפר קריאות</li>
+            </ul>
+
+            <div class="mt-6 flex gap-3">
+              <button class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 transition font-semibold" onclick="swiper.slideTo(1)">התחל הצגה</button>
+              <a class="px-4 py-2 rounded-lg border border-slate-600 hover:border-cyan-400 transition text-slate-200" href="#contact">פרטי קשר</a>
+            </div>
           </div>
+
           <div class="right-col single-img">
-            <img src="מחצבת ורד.png" alt="תצוגה כללית" class="rounded-lg shadow-xl" />
+            <img src="מחצבת ורד.png" alt="תצוגה כללית (דוגמה)" class="rounded-lg shadow-xl" />
+            <p class="text-xs text-slate-400 mt-2">תמונה משולבת להמחשה — ניתן להחליף בתמונה ראשית משל כל פרויקט.</p>
           </div>
         </div>
         <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
       </section>
 
-      <!-- ניתן להוסיף כאן את כל שאר השקופיות כמו קודם, עם footer-note מתחת -->
+      <!-- מחצבת ורד -->
+      <section class="swiper-slide slide" data-index="2" aria-label="שקופית 2">
+        <div class="card reveal">
+          <div class="left-col">
+            <h2 class="project-title text-cyan-400 font-extrabold">מחצבת ורד</h2>
+            <p class="text-slate-300 mt-1">איזור תעשייה | בתכנון</p>
+            <p class="text-yellow-300 mt-2 font-semibold">עלות משוערת: ~20 מיליון ₪ | תקופה: 2025–2027</p>
+
+            <p class="mt-4 text-slate-200 leading-relaxed">פיתוח מחצבה חדשה לאספקת חומרי בניה למרכז הארץ — כולל חיזוק קירות, דרכי גישה ותכנון סגמנטים לטעינה ופריקה. דגש על סילוק מפגעים סביבתיים ונגישות לדרכי תחבורה ראשיות.</p>
+
+            <div class="mt-4 text-slate-300">
+              <p><strong>מועמדים:</strong> אוריה קהת, מיטב חכים</p>
+              <p><strong>ניהול פרויקט:</strong> אלעד רוזן</p>
+              <p><strong>מזמין עבודה:</strong> שפיר הנדסה אזרחית וימית</p>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="single-img w-full">
+              <img src="מחצבת ורד.png" alt="מחצבת ורד - תמונה ראשית" />
+            </div>
+
+            <div class="img-grid w-full mt-2">
+              <img src="מחצבת ורד.png" alt="מחצבת ורד - תמונה נוספת" />
+              <!-- אם יש תמונות נוספות להוסיף כאן -->
+            </div>
+          </div>
+        </div>
+        <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
+      </section>
+
+      <!-- כביש 22 -->
+      <section class="swiper-slide slide" data-index="3" aria-label="שקופית 3">
+        <div class="card reveal">
+          <div class="left-col">
+            <h2 class="project-title text-gradient font-extrabold" style="color:transparent; background:linear-gradient(90deg,#06b6d4,#7c3aed); -webkit-background-clip:text; background-clip:text">כביש 22 – הר חוצבים</h2>
+            <p class="text-slate-300 mt-1">חיבור רמת שלמה להר חוצבים | בביצוע</p>
+            <p class="text-yellow-300 mt-2 font-semibold">עלות: 3.2 מיליארד ₪ | 2023–2026</p>
+
+            <p class="mt-4 text-slate-200 leading-relaxed">פרויקט תשתיתי מורכב הכולל חציבה, קירות תמך, מחלפים וחיבורי אינטרצ'יינג' — עבודות אזרחיות בשטח עירוני צפוף תוך שמירה על מינימום הפרעה לתנועה ותשתיות קיימות.</p>
+
+            <div class="mt-4 text-slate-300">
+              <p><strong>מועמדים:</strong> ליאור קטוב, מיטב חכים, אוריה קהת</p>
+              <p><strong>קונסטרוקציה:</strong> מיכאל, שמיר פוזנר בראון</p>
+              <p><strong>אדריכלות נוף:</strong> שמרית | <strong>פיקוח:</strong> ברוך אירם</p>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="img-grid w-full">
+              <img src="כביש 22 - הר חוצבים.png" alt="כביש 22 - צילום רחב" />
+              <img src="כביש 22 - הר חוצבים - תכנית.png" alt="כביש 22 - תכנית" />
+              <img src="כביש 22 - הר חוצבים - תכנית כללית.png" alt="כביש 22 - תכנית כללית" />
+            </div>
+          </div>
+        </div>
+        <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
+      </section>
+
+      <!-- כביש 6 – מקטע קסם -->
+      <section class="swiper-slide slide" data-index="4" aria-label="שקופית 4">
+        <div class="card reveal">
+          <div class="left-col">
+            <h2 class="project-title text-green-400 font-extrabold">כביש 6 – מקטע קסם (ניצני עוז)</h2>
+            <p class="text-slate-300 mt-1">הרחבה והוספת נר"ת | בביצוע</p>
+            <p class="text-yellow-300 mt-2 font-semibold">עלות: 6.8 מיליארד ₪ | 2022–2025</p>
+
+            <p class="mt-4 text-slate-200 leading-relaxed">הוספת נתיבי נסיעה, הרחבת מחלפים ושיפור חיבורי כניסה/יציאה. ביצוע בשיטת שלבי עבודה כדי לאפשר המשך תנועה בכביש הקיים.</p>
+
+            <div class="mt-4 text-slate-300">
+              <p><strong>מועמדים:</strong> ליאור קטוב, מיטב חכים, אוריה קהת</p>
+              <p><strong>קונסטרוקציה:</strong> יוליה פתחוב | <strong>אדריכלות נוף:</strong> ליאת חיל</p>
+              <p><strong>ניהול פרויקט:</strong> דנה פריד</p>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="img-grid w-full">
+              <img src="כביש 6 - מחלף קסם.png" alt="מחלף קסם - כביש 6" />
+              <img src="כביש 6 - מחלף אייל.png" alt="מחלף אייל" />
+            </div>
+          </div>
+        </div>
+        <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
+      </section>
+
+      <!-- כביש 6 – מקטע 8 -->
+      <section class="swiper-slide slide" data-index="5" aria-label="שקופית 5">
+        <div class="card reveal">
+          <div class="left-col">
+            <h2 class="project-title font-extrabold" style="background:linear-gradient(90deg,#f59e0b,#fb923c); -webkit-background-clip:text; color:transparent;">כביש 6 – מקטע 8</h2>
+            <p class="text-slate-300 mt-1">חלופה לקראת הגשה למכרז</p>
+            <p class="text-yellow-300 mt-2 font-semibold">עלות משוערת: 8 מיליארד ₪ | 2025–2029</p>
+
+            <p class="mt-4 text-slate-200 leading-relaxed">חלופת תוואי חדשה הכוללת מחלפים מורכבים, גשרי עלייה וקטעי חיבור — תמיכה בתשתיות תת־קרקעיות ושילוב פתרונות הנדסיים להפחתת השפעה סביבתית.</p>
+
+            <div class="mt-4 text-slate-300">
+              <p><strong>מועמדים:</strong> מיטב חכים, אוריה קהת</p>
+              <p><strong>יזם:</strong> דימיטרי זבנסקי | <strong>ניהול פרוייקט:</strong> אלעד רוזן</p>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="img-grid w-full">
+              <img src="כביש 6 - מקטע 8.png" alt="כביש 6 - מקטע 8 - מבט כולל" />
+              <img src="כביש 6 - מקטע 8 - תכנית כללית.png" alt="תכנית כללית - מקטע 8" />
+              <img src="כביש 6 - מקטע 8 - מחלף אבליים.png" alt="מחלף אבליים - מקטע 8" />
+            </div>
+          </div>
+        </div>
+        <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
+      </section>
+
+      <!-- נתניה – חזית הים -->
+      <section class="swiper-slide slide" data-index="6" aria-label="שקופית 6">
+        <div class="card reveal">
+          <div class="left-col">
+            <h2 class="project-title text-blue-400 font-extrabold">נתניה – חזית הים</h2>
+            <p class="text-slate-300 mt-1">פיתוח חזית ימית | בביצוע</p>
+            <p class="text-yellow-300 mt-2 font-semibold">עלות: 1.5 מיליארד ₪ | 2023–2026</p>
+
+            <p class="mt-4 text-slate-200 leading-relaxed">פיתוח טיילת, שטחים ציבוריים, חניות חופיות ושיקום קו החוף. תכנון בהיבט סביבתי ונגישות, כולל חיזוק מבני חוף וצמצום סחף.</p>
+
+            <div class="mt-4 text-slate-300">
+              <p><strong>מועמדים:</strong> אוריה קהת, מיטב חכים</p>
+              <p><strong>ניהול פרויקט:</strong> אלעד רוזן</p>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="single-img w-full">
+              <img src="נתניה - חזית הים.png" alt="נתניה חזית הים - תמונה רחבה" />
+            </div>
+            <div class="mt-2 w-full text-xs text-slate-400">תמונת פרויקט והמחשה של התוכנית. יש להחליף בקבצים מקוריים לפי הצורך.</div>
+          </div>
+        </div>
+        <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
+      </section>
+
+      <!-- קו ירוק -->
+      <section class="swiper-slide slide" data-index="7" aria-label="שקופית 7">
+        <div class="card reveal">
+          <div class="left-col">
+            <h2 class="project-title text-green-300 font-extrabold">רכבת קלה – קו ירוק</h2>
+            <p class="text-slate-300 mt-1">דיפו הרצליה ודיפו חולון | פרויקט לאומי | בביצוע</p>
+            <p class="text-yellow-300 mt-2 font-semibold">עלות: 15 מיליארד ₪ | 2021–2027</p>
+
+            <p class="mt-4 text-slate-200 leading-relaxed">עבודות דיפו מרכזיות, תשתיות מסילות, מערכות חשמל ובקרת תנועה. ניהול ממשקי עבודה מול רשויות מקומיות ותיאום עם שדרוגי תשתיות קיימות.</p>
+
+            <div class="mt-4 text-slate-300">
+              <p><strong>מועמדים:</strong> ליאור קטוב, מיטב חכים</p>
+              <p><strong>ניהול פרויקט:</strong> מאיר חבר</p>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="img-grid w-full">
+              <img src="דיפו הרצליה - תכנית כללית.png" alt="דיפו הרצליה - תכנית כללית" />
+              <img src="דיפו חולון - תכנית כללית.png" alt="דיפו חולון - תכנית כללית" />
+            </div>
+          </div>
+        </div>
+        <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
+      </section>
+
+      <!-- תודה וסיום (FINAL) -->
+      <section class="swiper-slide slide" data-index="8" aria-label="שקופית 8 - סיום">
+        <div class="card reveal" style="align-items:center; flex-direction:column; text-align:center;">
+          <svg class="w-28 h-28 mb-4 animate-bounce" viewBox="0 0 128 128" aria-hidden="true" role="img" focusable="false">
+            <path d="M64 20 L48 40 L56 40 L48 60 L56 60 L44 80 L84 80 L72 60 L80 60 L72 40 L80 40 Z" fill="#22c55e"/>
+            <rect x="60" y="80" width="8" height="30" fill="#a16207"/>
+            <path d="M0 110 H128 L120 128 H8 Z" fill="#0ea5e9"/>
+          </svg>
+
+          <h2 class="text-3xl md:text-5xl font-extrabold">תודה על ההקשבה</h2>
+          <p class="text-lg md:text-2xl mt-2 text-slate-300">אינג' חן אברמס</p>
+          <p class="text-md md:text-xl mt-1 text-cyan-300">חפשו אותי ביוון</p>
+
+          <!-- big blinking + bouncing warning -->
+          <div style="margin-top:1.2rem;">
+            <div class="final-warning" role="alert" aria-live="assertive">⚠️ לא לפנות אליי — לא לדבר אליי ⚠️</div>
+            <div class="final-sub">בכל שאלה נא לפנות לאינג' מיטב חכים</div>
+          </div>
+
+          <div class="mt-6 flex gap-3">
+            <a href="#" class="px-4 py-2 rounded-md bg-cyan-600 hover:bg-cyan-500">חזור להצגה</a>
+            <a href="#" class="px-4 py-2 rounded-md border border-slate-600">יצירת קשר</a>
+          </div>
+        </div>
+        <div class="footer-note">ניתן לפנות בכל עת לאינג' מיטב חכים</div>
+      </section>
 
     </div>
   </div>
 
+  <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
   <script>
+    // initialize swiper on the container .mySwiper
     const swiper = new Swiper('.mySwiper', {
       direction: 'vertical',
       mousewheel: true,
@@ -236,9 +457,11 @@
       a11y: true,
     });
 
+    // prev/next buttons
     document.getElementById('prevBtn').addEventListener('click', ()=> swiper.slidePrev());
     document.getElementById('nextBtn').addEventListener('click', ()=> swiper.slideNext());
 
+    // progress indicator
     const progressEl = document.getElementById('progress');
     function updateProgress(){
       const idx = swiper.realIndex + 1;
@@ -248,27 +471,42 @@
     swiper.on('slideChange', updateProgress);
     updateProgress();
 
+    // reveal animations
     const observer = new IntersectionObserver((entries)=>{
-      entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+      entries.forEach(e=>{
+        if(e.isIntersecting) e.target.classList.add('visible');
+      });
     }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
+    // ensure images lazy + alt fallback
     document.querySelectorAll('img').forEach(img=>{
       img.loading = 'lazy';
       if(!img.alt || img.alt.trim()==='') img.alt = 'תמונה פרויקט';
     });
 
+    // add tabindex / aria for slides
+    document.querySelectorAll('.swiper-slide').forEach((s, i)=>{
+      s.setAttribute('tabindex','0');
+      s.setAttribute('aria-label', `שקופית ${i+1}`);
+    });
+
+    // BUILD SIDE PANEL BUTTONS (keep titles from slides)
     const sidePanel = document.getElementById('sidePanel');
     const slideButtons = [];
+
     function getSlideTitle(slideEl, idx){
+      // prefer h1.title-main then h2.project-title else generic
       const h1 = slideEl.querySelector('h1.title-main');
       if(h1) return h1.textContent.trim();
       const h2 = slideEl.querySelector('h2.project-title');
       if(h2) return h2.textContent.trim();
+      // fallback from first heading
       const anyHeading = slideEl.querySelector('h1, h2, h3');
       if(anyHeading) return anyHeading.textContent.trim();
       return `שקופית ${idx+1}`;
     }
+
     swiper.slides.forEach((slide, idx) => {
       const title = getSlideTitle(slide, idx);
       const btn = document.createElement('button');
@@ -280,12 +518,20 @@
       slideButtons.push(btn);
     });
 
+    // update active class
     function updateActiveSide(){
       slideButtons.forEach((b, i) => b.classList.toggle('active', i === swiper.activeIndex));
     }
     swiper.on('slideChange', updateActiveSide);
     updateActiveSide();
 
+    // keyboard support for prev/next via PageUp/PageDown, ArrowUp/ArrowDown already handled by swiper but ensure no conflicts
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'PageDown' || e.key === 'ArrowDown') swiper.slideNext();
+      if(e.key === 'PageUp' || e.key === 'ArrowUp') swiper.slidePrev();
+    });
+
+    // make sure footer-note exists on any slide missing it (defensive)
     document.querySelectorAll('.swiper-slide').forEach(sl=>{
       if(!sl.querySelector('.footer-note')){
         const f = document.createElement('div');
@@ -295,6 +541,11 @@
       }
     });
 
+    // initial reveal activation for first slide
     window.addEventListener('load', ()=>{
       const cur = swiper.slides[swiper.activeIndex];
-      cur.querySelectorAll('.reveal').forEach(el=>el.classList
+      cur.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+    });
+  </script>
+</body>
+                                                                                                                                                                                </html>
