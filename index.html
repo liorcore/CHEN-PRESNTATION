@@ -18,6 +18,7 @@
     body{
       background: linear-gradient(180deg,#05060a 0%, #0b1220 100%);
       color: #fff;
+      /* חשוב: אפשר גלילה אם תוכן גבוה במיוחד */
       overflow: hidden;
     }
 
@@ -56,6 +57,7 @@
       user-select: none;
     }
     .side-btn:hover { background: rgba(125,211,252,0.12); color:#fff; transform: translateX(-4px); }
+    .side-btn:focus { outline: 3px solid rgba(125,211,252,0.18); }
     .side-btn.active { background: linear-gradient(90deg,#22c55e,#06b6d4); color: #012; box-shadow: 0 6px 22px rgba(34,197,94,0.12); transform:none; }
 
     /* main swiper area shifted left so panel לא יסתיר */
@@ -64,19 +66,19 @@
     @media (max-width: 900px) {
       /* סמארטפון - מסתיר את הפאנל ומרכיב את השקופיות לרוחב מלא */
       #sidePanel { display:none; }
-      .swiper { margin-right: 0; width: 100vw; }
+      .swiper { margin-right: 0; width: 100vw; height: 100vh; }
     }
 
     /* slide layout */
     .swiper-slide {
       width: 100%;
-      height: 100vh;
+      min-height: 100vh; /* מוודא שקופית תופסת את הגובה */
       display:flex;
       align-items:center;
       justify-content:center;
       padding: 2rem;
       box-sizing: border-box;
-      overflow: auto;
+      overflow: hidden;
     }
 
     .card {
@@ -92,6 +94,10 @@
       align-items:flex-start;
       color:#e6eef8;
       flex-wrap: wrap;
+      box-sizing: border-box;
+      /* חשוב: מגבלת גובה + גלילה פנימית במכשירים קטנים */
+      max-height: calc(100vh - 140px);
+      overflow: auto;
     }
 
     .left-col { flex: 1 1 420px; min-width: 300px; font-size: 1.07rem; line-height:1.5; }
@@ -108,6 +114,7 @@
       box-shadow: 0 10px 30px rgba(2,6,23,0.6);
       transition: transform .45s cubic-bezier(.2,.8,.2,1), filter .3s;
       transform-origin:center;
+      display:block;
     }
     .img-grid img:hover, .single-img img:hover { transform: scale(1.03) rotate(-0.3deg); filter:brightness(1.03); }
 
@@ -187,13 +194,22 @@
       0%{ transform: translateY(0); } 50%{ transform: translateY(-10px); } 100%{ transform: translateY(0); }
     }
 
-    /* small screens adjust */
+    /* small screens adjust — מניעת חפיפות: כיוון תוכן, גלילה פנימית */
     @media(max-width:720px){
-      .card{ padding:1rem; flex-direction:column; align-items:center; text-align:center; }
+      body{ overflow: auto; } /* מאפשר גלילה חיצונית במקרים קיצוניים */
+      .swiper-slide{ align-items:flex-start; padding: 1rem 0.9rem; min-height: auto; }
+      .card{ padding:1rem; flex-direction:column; align-items:flex-start; text-align:right; max-height: calc(100vh - 130px); overflow:auto; }
       .left-col, .right-col{ width:100%; min-width:unset; }
       .img-grid img, .single-img img{ height:200px; }
       .footer-note{ display:block; position: static; margin-top:1rem; }
+      .logo{ top:0.8rem; height:48px; }
+      .nav-btn{ bottom: .9rem; padding:.45rem .6rem; }
     }
+
+    /* ensure focus outlines visible on keyboard */
+    :focus { outline: none; }
+    button:focus, a:focus { outline: 3px solid rgba(125,211,252,0.14); border-radius:8px; }
+
   </style>
 </head>
 <body>
@@ -209,11 +225,11 @@
 
   <!-- bottom nav -->
   <div class="nav-btn" role="navigation" aria-label="ניווט שקופיות">
-  	<button id="prevBtn" aria-label="שקופית קודמת">הקודם ⟶</button>
-    <button id="nextBtn" aria-label="שקופית הבאה">⟵ הבא </button>
+  	<button id="prevBtn" aria-label="שקופית קודמת">⟵ הקודם</button>
+    <button id="nextBtn" aria-label="שקופית הבאה">הבא ⟶</button>
   </div>
 
-  <div class="progress" id="progress">1 / 8</div>
+  <div class="progress" id="progress" aria-live="polite">1 / 8</div>
 
   <!-- Swiper container (moved left to avoid panel) -->
   <div class="swiper mySwiper" id="app">
@@ -221,9 +237,9 @@
 
       <!-- HERO -->
       <section class="swiper-slide slide" data-index="1" aria-label="שקופית 1">
-        <div class="card reveal">
+        <div class="card reveal" role="group" aria-labelledby="title-1">
           <div class="left-col">
-            <h1 class="title-main">חפיפת פרויקטים</h1>
+            <h1 id="title-1" class="title-main">חפיפת פרויקטים</h1>
             <p class="text-cyan-300 mt-3 font-semibold">לטובת חופשת האינג'יניר</p>
             <p class="mt-4 text-slate-200 leading-relaxed">מצגת זו מציגה סקירה מקיפה של הפרויקטים הלאומיים והתשתיתיים שבניהולנו — פרטי פרויקט, תקציבים, לוחות זמנים, תמונות ומידע צוותי. המטרה: לאפשר המשכיות מלאה בזמן חופשה/העברה.</p>
 
@@ -233,7 +249,7 @@
               <li>אנימציות קלות כדי לשפר קריאות</li>
             </ul>
 
-            <div class="mt-6 flex gap-3">
+            <div class="mt-6 flex flex-wrap gap-3">
               <button class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 transition font-semibold" onclick="swiper.slideTo(1)">התחל הצגה</button>
               <a class="px-4 py-2 rounded-lg border border-slate-600 hover:border-cyan-400 transition text-slate-200" href="#contact">פרטי קשר</a>
             </div>
@@ -249,9 +265,9 @@
 
       <!-- מחצבת ורד -->
       <section class="swiper-slide slide" data-index="2" aria-label="שקופית 2">
-        <div class="card reveal">
+        <div class="card reveal" role="group" aria-labelledby="title-2">
           <div class="left-col">
-            <h2 class="project-title text-cyan-400 font-extrabold">מחצבת ורד</h2>
+            <h2 id="title-2" class="project-title text-cyan-400 font-extrabold">מחצבת ורד</h2>
             <p class="text-slate-300 mt-1">איזור תעשייה | בתכנון</p>
             <p class="text-yellow-300 mt-2 font-semibold">עלות משוערת: ~20 מיליון ₪ | תקופה: 2025–2027</p>
 
@@ -280,9 +296,9 @@
 
       <!-- כביש 22 -->
       <section class="swiper-slide slide" data-index="3" aria-label="שקופית 3">
-        <div class="card reveal">
+        <div class="card reveal" role="group" aria-labelledby="title-3">
           <div class="left-col">
-            <h2 class="project-title text-gradient font-extrabold" style="color:transparent; background:linear-gradient(90deg,#06b6d4,#7c3aed); -webkit-background-clip:text; background-clip:text">כביש 22 – הר חוצבים</h2>
+            <h2 id="title-3" class="project-title font-extrabold" style="background:linear-gradient(90deg,#06b6d4,#7c3aed); -webkit-background-clip:text; background-clip:text; color:transparent;">כביש 22 – הר חוצבים</h2>
             <p class="text-slate-300 mt-1">חיבור רמת שלמה להר חוצבים | בביצוע</p>
             <p class="text-yellow-300 mt-2 font-semibold">עלות: 3.2 מיליארד ₪ | 2023–2026</p>
 
@@ -308,9 +324,9 @@
 
       <!-- כביש 6 – מקטע קסם -->
       <section class="swiper-slide slide" data-index="4" aria-label="שקופית 4">
-        <div class="card reveal">
+        <div class="card reveal" role="group" aria-labelledby="title-4">
           <div class="left-col">
-            <h2 class="project-title text-green-400 font-extrabold">כביש 6 – מקטע קסם (ניצני עוז)</h2>
+            <h2 id="title-4" class="project-title text-green-400 font-extrabold">כביש 6 – מקטע קסם (ניצני עוז)</h2>
             <p class="text-slate-300 mt-1">הרחבה והוספת נר"ת | בביצוע</p>
             <p class="text-yellow-300 mt-2 font-semibold">עלות: 6.8 מיליארד ₪ | 2022–2025</p>
 
@@ -335,9 +351,9 @@
 
       <!-- כביש 6 – מקטע 8 -->
       <section class="swiper-slide slide" data-index="5" aria-label="שקופית 5">
-        <div class="card reveal">
+        <div class="card reveal" role="group" aria-labelledby="title-5">
           <div class="left-col">
-            <h2 class="project-title font-extrabold" style="background:linear-gradient(90deg,#f59e0b,#fb923c); -webkit-background-clip:text; color:transparent;">כביש 6 – מקטע 8</h2>
+            <h2 id="title-5" class="project-title font-extrabold" style="background:linear-gradient(90deg,#f59e0b,#fb923c); -webkit-background-clip:text; color:transparent;">כביש 6 – מקטע 8</h2>
             <p class="text-slate-300 mt-1">חלופה לקראת הגשה למכרז</p>
             <p class="text-yellow-300 mt-2 font-semibold">עלות משוערת: 8 מיליארד ₪ | 2025–2029</p>
 
@@ -362,9 +378,9 @@
 
       <!-- נתניה – חזית הים -->
       <section class="swiper-slide slide" data-index="6" aria-label="שקופית 6">
-        <div class="card reveal">
+        <div class="card reveal" role="group" aria-labelledby="title-6">
           <div class="left-col">
-            <h2 class="project-title text-blue-400 font-extrabold">נתניה – חזית הים</h2>
+            <h2 id="title-6" class="project-title text-blue-400 font-extrabold">נתניה – חזית הים</h2>
             <p class="text-slate-300 mt-1">פיתוח חזית ימית | בביצוע</p>
             <p class="text-yellow-300 mt-2 font-semibold">עלות: 1.5 מיליארד ₪ | 2023–2026</p>
 
@@ -388,9 +404,9 @@
 
       <!-- קו ירוק -->
       <section class="swiper-slide slide" data-index="7" aria-label="שקופית 7">
-        <div class="card reveal">
+        <div class="card reveal" role="group" aria-labelledby="title-7">
           <div class="left-col">
-            <h2 class="project-title text-green-300 font-extrabold">רכבת קלה – קו ירוק</h2>
+            <h2 id="title-7" class="project-title text-green-300 font-extrabold">רכבת קלה – קו ירוק</h2>
             <p class="text-slate-300 mt-1">דיפו הרצליה ודיפו חולון | פרויקט לאומי | בביצוע</p>
             <p class="text-yellow-300 mt-2 font-semibold">עלות: 15 מיליארד ₪ | 2021–2027</p>
 
@@ -414,14 +430,14 @@
 
       <!-- תודה וסיום (FINAL) -->
       <section class="swiper-slide slide" data-index="8" aria-label="שקופית 8 - סיום">
-        <div class="card reveal" style="align-items:center; flex-direction:column; text-align:center;">
+        <div class="card reveal" style="align-items:center; flex-direction:column; text-align:center;" role="group" aria-labelledby="title-8">
           <svg class="w-28 h-28 mb-4 animate-bounce" viewBox="0 0 128 128" aria-hidden="true" role="img" focusable="false">
             <path d="M64 20 L48 40 L56 40 L48 60 L56 60 L44 80 L84 80 L72 60 L80 60 L72 40 L80 40 Z" fill="#22c55e"/>
             <rect x="60" y="80" width="8" height="30" fill="#a16207"/>
             <path d="M0 110 H128 L120 128 H8 Z" fill="#0ea5e9"/>
           </svg>
 
-          <h2 class="text-3xl md:text-5xl font-extrabold">תודה על ההקשבה</h2>
+          <h2 id="title-8" class="text-3xl md:text-5xl font-extrabold">תודה על ההקשבה</h2>
           <p class="text-lg md:text-2xl mt-2 text-slate-300">אינג' חן אברמס</p>
           <p class="text-md md:text-xl mt-1 text-cyan-300">חפשו אותי ביוון</p>
 
@@ -455,6 +471,8 @@
       effect: 'slide',
       slidesPerView: 1,
       a11y: true,
+      autoHeight: true, // מאפשר התאמת גובה השקופית לגובה התוכן (מונע חציית תוכן במובייל)
+      // אם רוצים אפשר להוסיף pagination / scrollbar בעתיד
     });
 
     // prev/next buttons
@@ -464,14 +482,15 @@
     // progress indicator
     const progressEl = document.getElementById('progress');
     function updateProgress(){
-      const idx = swiper.realIndex + 1;
+      // total slides that are actual slides (exclude duplicates if loop enabled)
       const total = swiper.slides.length;
+      const idx = swiper.realIndex + 1;
       progressEl.textContent = `${idx} / ${total}`;
     }
     swiper.on('slideChange', updateProgress);
     updateProgress();
 
-    // reveal animations
+    // reveal animations - observe each .reveal inside slides
     const observer = new IntersectionObserver((entries)=>{
       entries.forEach(e=>{
         if(e.isIntersecting) e.target.classList.add('visible');
@@ -507,13 +526,19 @@
       return `שקופית ${idx+1}`;
     }
 
+    // fill sidePanel only if it's visible (avoids building hidden panel on tiny screens but harmless)
     swiper.slides.forEach((slide, idx) => {
       const title = getSlideTitle(slide, idx);
       const btn = document.createElement('button');
       btn.className = 'side-btn';
       btn.innerText = title;
       btn.setAttribute('aria-label', `מעבר ל${title}`);
-      btn.addEventListener('click', ()=> swiper.slideTo(idx));
+      btn.addEventListener('click', ()=> {
+        // slideTo expects slide index (not realIndex)
+        swiper.slideTo(idx);
+        // on mobile, blur to hide virtual keyboard if open
+        btn.blur();
+      });
       sidePanel.appendChild(btn);
       slideButtons.push(btn);
     });
@@ -544,8 +569,17 @@
     // initial reveal activation for first slide
     window.addEventListener('load', ()=>{
       const cur = swiper.slides[swiper.activeIndex];
-      cur.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+      if(cur) cur.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+      updateProgress();
+      updateActiveSide();
     });
+
+    // defensive: if window resized from large to small, ensure swiper container recalculates sizes
+    window.addEventListener('resize', () => {
+      swiper.updateAutoHeight(300);
+      swiper.update();
+    });
+
   </script>
 </body>
 </html>
